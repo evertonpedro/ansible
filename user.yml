@@ -1,0 +1,7 @@
+---
+- hosts: "{{ host }}" 
+  remote_user: (Usuario SUDO)
+  become: yes
+  serial: 1
+  roles:
+     - user

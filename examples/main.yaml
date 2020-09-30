@@ -1,0 +1,10 @@
+---
+- hosts: "{{ host }}" 
+  remote_user: (SUDO USER)
+  roles:
+    - role: user
+      tags: user 
+    - role: update
+      tags: update
+    - role: firewall
+      tags: firewall

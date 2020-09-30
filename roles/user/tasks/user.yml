@@ -1,0 +1,19 @@
+- name: Remove the user
+  tags: remover
+  user:
+    name: "{{ user }}"
+    state: absent
+    remove: yes
+
+- name: Add the user 'user' with a bash shell
+  tags: criar 
+  user:
+    name: "{{ user }}"
+    shell: /bin/bash
+    password: 'PASSWORD GERADO COM HASH'
+    comment: Usuario
+
+- name: Force user "user" to change the password
+  tags: criar
+  command: 
+    chage -d 0 "{{ user }}"

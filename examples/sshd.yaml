@@ -1,0 +1,15 @@
+- hosts: "{{ host }}" 
+  tasks:
+    - name: PermitRoot Login 
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: "{{item.regexp}}"
+        line: "{{item.line}}"
+        state: present
+      with_items:
+              - { regexp: "^#?PermitRootLogin", line: "PermitRootLogin no" }
+                #        - { line: "PermitRootLogin yes" }
+    - name: Reload SSH
+      service:
+        name: ssh
+        state: reloaded

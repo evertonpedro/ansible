@@ -1,0 +1,134 @@
+- name: Flush existing firewall rules
+  tags: flush
+  iptables:
+    flush: true
+
+- name: iptables flush filter
+  tags: flush
+  iptables:
+    chain: "{{ item }}"
+    flush: yes
+  with_items:  [ 'INPUT', 'FORWARD', 'OUTPUT' ]
+
+- name: iptables flush nat
+  tags: flush
+  iptables:
+    table: nat
+    chain: '{{ item }}'
+    flush: yes
+  with_items: [ 'INPUT', 'OUTPUT', 'PREROUTING', 'POSTROUTING' ]
+
+
+################ INICIO DAS REGRAS DE FIREWALL  ##################################
+##################################################################################
+
+- name: Firewall rule - allow all loopback traffic
+  iptables:
+    action: append
+    chain: INPUT
+    in_interface: lo
+    jump: ACCEPT
+
+- name: Firewall rule - allow all loopback traffic
+  iptables:
+    action: append
+    chain: OUTPUT
+    out_interface: lo
+    jump: ACCEPT
+
+- name: Firewall rule - allow established connections
+  iptables:
+    chain: INPUT
+    ctstate: ESTABLISHED,RELATED
+    jump: ACCEPT
+
+- name: Firewall rule - allow port ping traffic
+  iptables:
+    chain: INPUT
+    jump: ACCEPT
+    protocol: icmp
+#################################################################################
+- name: Regra Iptables comum para todos os Servidores
+  iptables:
+    chain: INPUT
+    protocol: tcp
+    ctstate: NEW
+    source: "{{ item.source }}"
+    destination_port: "{{ item.port }}" 
+    jump: ACCEPT
+  with_items: "{{comum}}" #CONDIÇÂO PARA SELECIONAR E EXECUTAR APENAS ESSE GRUPO HOST
+
+- name: Liberação de Portas HTTP e HTTPS Servidores WEB 
+  iptables:
+    chain: INPUT
+    protocol: tcp
+    ctstate: NEW
+    source: "{{ item.source }}"
+    destination_port: "{{ item.port }}" 
+    jump: ACCEPT
+  with_items: "{{ web }}" #CONDIÇÂO PARA SELECIONAR E EXECUTAR APENAS ESSE GRUPO HOST
+  when: "'web' in group_names or inventory_hostname == '(hostname)'"
+
+- name: Liberação portas Mysql
+  iptables:
+    chain: INPUT
+    protocol: tcp
+    ctstate: NEW
+    source: "{{ item.source }}"
+    destination_port: "{{ item.port }}"
+    jump: ACCEPT
+  with_items: "{{ database }}" #CONDIÇÂO PARA SELECIONAR E EXECUTAR APENAS ESSE GRUPO HOST
+  when: "'database' in group_names or inventory_hostname == '(hostname)'"
+
+- name: Servidores DNS. 
+  iptables:
+    chain: INPUT
+    protocol: "{{ item.protocol }}"
+    ctstate: NEW
+    source: "{{ item.source }}"
+    destination_port: "{{ item.port }}" 
+    jump: ACCEPT
+  with_items: "{{ dns }}" #CONDIÇÂO PARA SELECIONAR E EXECUTAR APENAS ESSE GRUPO HOST
+  when: "'dns' in group_names"
+
+#- debug:
+#    var: group_names 
+
+- name: Firewall rule - drop any traffic without   rule
+  iptables:
+    chain: INPUT
+    jump: DROP
+
+###############################################################################
+####### NESSA PARTE DO CÓDIGO É CRIADO E CONFIGURADO O SERVIÇO DE FIREWALL NO SERVIDOR ######
+- name: Criar Diretorio /etc/firewall
+  become: yes
+  file:
+    path: /etc/firewall
+    state: directory
+
+- name: save iptables
+  become: yes
+  shell: "iptables-save >> /etc/firewall/rulesV4"
+
+- name: Copiar Firewall.Service para criar servico de start automatico Iptables
+  become: yes
+  copy:
+    src: /etc/ansible/roles/iptables/files/firewall.service
+    dest: /etc/systemd/system
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Copiar stopfirewall.sh arquivo utilizado para stop de firewall caso ocorra algum problema
+  become: yes
+  copy:
+    src: /etc/ansible/roles/iptables/files/stopfirewall.sh
+    dest: /etc/firewall
+    owner: root
+    group: root
+    mode: 0744
+
+- name: Habilitar Serviço de Firewall
+  become: yes
+  shell: "systemctl enable firewall.service"

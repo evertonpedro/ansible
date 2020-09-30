@@ -1,0 +1,13 @@
+---
+ all:
+   children:
+     local:
+       localhost ansible_connection=local ansible_python_interpreter=python gather_facts=false:
+     web:
+       hosts:
+         x.x.x.x: #IP ou NOME DO SERVIDOR
+         teste.xtx: #IP ou NOME DO SERVIDOR
+         
+     dominio:
+       hosts:
+         x.x.x.x:

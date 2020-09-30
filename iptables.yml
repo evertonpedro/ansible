@@ -1,0 +1,9 @@
+- hosts: "{{ host }}" 
+  become: yes
+  remote_user: (Usuario utilizado com sudo)
+  gather_facts: false
+  #vars_files:
+  # - /etc/ansible/roles/iptables/vars/main.yml
+#  serial: 1
+  roles:
+    - iptables

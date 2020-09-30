@@ -1,0 +1,14 @@
+---
+#- hosts: "{{ variable_host | default('web') }}"
+- name: Update APT package cache
+  apt: update_cache=yes cache_valid_time=600
+  become: yes
+  when: ansible_os_family == "Debian" or ansible_os_family == "Ubuntu" 
+  tags: update
+
+- name: Upgrade All apt Package
+  apt: upgrade=safe
+  become: yes
+  when: ansible_os_family == "Debian" or ansible_os_family == "Ubuntu" 
+  tags: upgrade
+

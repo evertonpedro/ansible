@@ -1,0 +1,12 @@
+[Unit]
+Description=Adicionando Regras de Firewall ao Iniciar
+Before=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/bin/sh -c "/sbin/iptables-restore < /etc/firewall/rulesV4"
+#ExecStart=/etc/firewall/enable6.sh  #For IPV6
+
+[Install]
+WantedBy=multi-user.target
+

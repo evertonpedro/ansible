@@ -1,0 +1,15 @@
+# Provide variables according to the environment
+---
+comum: #NOME DO GRUPO da REGRA
+  - { source:  'x.x.x.x/x', port: '22' }
+  - { source:  'x.x.x.x/x', port: '10050' }
+web:         
+  - { source:  'x.x.x.x/x',  port: '80' }
+  - { source:  'x.x.x.x/x',  port: '443' }
+  
+database:
+  - { source: 'x.x.x.x/x',  port: '3306' }
+dns:
+  - { source: 'x.x.x.x/x',  port: '53', protocol: 'tcp' }
+  - { source: 'x.x.x.x/x',  port: '53', protocol: 'udp' }
+

@@ -1,0 +1,5 @@
+- name: Upgrade All apt Package
+  apt: upgrade=safe
+  become: yes
+  when: ansible_os_family == "Debian" or ansible_os_family == "Ubuntu" 
+  tags: upgrade
